@@ -1,0 +1,137 @@
+RASPBIAN INSTALLATION
+
+The following description may be helpful if you install Raspbian for the first time.
+
+Note: You may want to invoke raspi-config instead of the instructions used here; in order to make these changes and for further setups. If your system is connected to the internet, you may want to consider additional security measures.
+
+(*) Write Image to SD Card:
+
+A (fresh) Raspbian image (2017-09-07) is used. The SD card, which will be used in the Raspberry Pi, is prepared beforehand on a Linux desktop. The wildcard '/dev/sdX' is used for the SD card's actual device name (e.g. /dev/sdc).
+
+$ export DEV=/dev/sdX
+$ wget https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/2017-09-07-raspbian-stretch.zip
+$ unzip -p 2017-09-07-raspbian-stretch.zip | sudo dd of=$DEV bs=1M status=progress
+$ sudo partprobe $DEV
+
+Notes:
+
+* The write operation may take serveral minutes. For a class 10 SDHC card it took here about nine minutes.
+* Older dd implementations may not support the option 'status=progress'.
+
+(*) Enable a Headless Pi with SSH and WLAN:
+
+If you want to run a headless Pi, you can prepare the SD card as follows before you boot it up for the first time.
+
+Enable the SSH daemon:
+
+$ sudo mkdir -p /media/pi
+$ sudo mount ${DEV}1 /media/pi
+$ sudo touch /media/pi/ssh
+$ sudo umount /media/pi
+
+Enable WLAN:
+
+$ sudo mount ${DEV}2 /media/pi
+$ echo '
+network={
+    ssid="APN" 
+    psk="PASSWORD" 
+}' | sudo tee -a /media/pi/etc/wpa_supplicant/wpa_supplicant.conf
+$ sudo umount /media/pi
+$ sudo rmdir /media/pi
+
+...APN and PASSWORD are your WLAN's credentials.
+
+(*) Boot the first time:
+
+Insert the prepared SD card into your Pi and boot it up.
+
+You'll see a message pop up telling that file system gets automatically extended to cover the full SD card's size; then the system boots again. This time the Pixel desktop comes up.
+
+(*) Open a Terminal
+
+The default hostname is "raspberrypi", the user is "pi" and the password is "raspberry".
+
+* Start up a GUI terminal if you use the Pixel desktop;
+* Login if you use a console; or
+* Connect from a remote host with ssh (if sshd was already set up). 
+
+E.g.
+$ ssh pi@raspberrypi
+[raspberry]
+
+(*) In case you need to set up SSH (if not already done):
+
+$ sudo service ssh start
+
+(*) Change Default Password:
+
+$ passwd
+[raspberry]
+[new_password]
+[new_password]
+
+(*) Change Hostname:
+
+Here, the  hostname and the name of the SD card's (2nd) partition is changed. In this example the name "demopi" is used. A dedicated name may be useful if there are other Raspberry Pis on the network and/or if you use more than one SD card.
+
+$ export HOST=demopi
+$ echo $HOST | sudo tee /etc/hostname
+$ sudo sed -i s/raspberrypi/$HOST/ /etc/hosts
+$ sudo e2label /dev/mmcblk0p2 $HOST
+$ sudo reboot
+$ ssh pi@demopi
+[new_password]
+
+(*) Disable / Enable Swap:
+
+Paging on the Pi can be painfully slow; you may be better off without any page space.
+
+$ sudo /etc/init.d/dphys-swapfile stop
+$ sudo /etc/init.d/dphys-swapfile start
+
+Permanent setting, e.g.:
+/etc/dphys-swapfile:CONF_SWAPSIZE=0
+
+See also swapon, swapoff, mkswap.
+
+(*) Set Locale
+
+The following command lets you de/selected your locales.
+
+$ dpkg-reconfigure locales
+
+Note: "If you have users who access the system through ssh, it is recommended that you choose None as your default locale."
+
+(see https://wiki.debian.org/Locale)
+
+(*) Set up the Keyboard Layout:
+
+$ sudo dpkg-reconfigure keyboard-configuration
+
+(see https://wiki.debian.org/Keyboard)
+
+(*) Set Timezone:
+
+$ sudo dpkg-reconfigure tzdata
+
+(see https://wiki.debian.org/TimeZoneChanges)
+
+(*) SSH w/o Password:
+
+Often a host system is used and the Raspberry Pi is headless and/or the Pi is mostly used remotely anyway. In those cases, the password dialog may get a bit annoying. The commands below are executed on the host system.
+
+$ ssh-keygen -t rsa
+$ cat ~/.ssh/id_rsa.pub | ssh pi@demopi 'mkdir -p .ssh && cat >> .ssh/authorized_keys'
+
+This permits the host to log into the Pi without a password. But not the Pi into the host system. You may not want to enable the latter one, especially not if the Pi is exposed.
+
+(*) HDMI Overscan
+
+Enter (or uncomment if already there) the line below in /boot/config.txt if the display has a visible black border of unused pixels and if the display can be used without overscan.
+
+disable_overscan=1
+
+REFERENCE
+
+This project including this file is hosted at https://github.com/ma16/monte.

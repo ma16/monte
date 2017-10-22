@@ -1,0 +1,87 @@
+INSTALLATION NOTES
+
+The platform must be POSIX compliant (e.g. Raspbian) and must support /dev/mem and /dev/vcio.
+
+For the remainder of the document it is assumed that Raspbian Stretch is installed (see RASPBIAN document in this folder). 
+
+https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/2017-09-07-raspbian-stretch.zip
+
+Other distributions and also other versions of Raspbian may or may not work.
+
+Notes:
+
+* These instructions regard a freshly installed Raspbian image (2017-09-07).
+* Raspbian (2017-09-07) uses gcc version 6.3.0 20170516 (Raspbian 6.3.0-18+rpi1).
+* You may want to use a fast multi-core SOC (e.g. Pi-3) and run make with option -j4 to speed up compilation. (Cross-compiling can be much faster; however it is not covered here.)
+
+CONTRIBUTIONS
+
+This project uses (besides all the contributions that come with Raspbian):
+
+* the Boost library (https://www.boost.org),
+* the Qt toolkit to provide a GUI (https://www.qt.io),
+* the Fontconfig package to handle fonts in a static Qt installation (https://www.freedesktop.org/wiki/Software/fontconfig).
+
+BUILD WITH DYNAMIC QT LIBRARY
+
+(1) Install / Compile contributions:
+
+The package installation and compilation will take a few minutes.
+
+$ sudo apt-get -y install libboost-dev
+$ sudo apt-get -y install qt5-default
+$ git clone git://code.qt.io/qt/qtcharts.git
+$ cd qtcharts
+$ git checkout 5.7
+$ qmake
+$ make
+$ sudo make install
+$ cd ..
+
+At the time of writing, Raspbian installed:
+
+* Boost version 1.62 (libboost1.62-dev:armhf/1.62.0+dfsg-4)
+* Qt version 5.7 (qt5-default/5.7.1+dfsg-3+rpi1).
+
+Other Raspbians or an updated Raspbian may install different packages which may result in problems.
+
+Git's QtCharts version was: 01ec7b7ae4cdfabf2228911a96f57e2da8f333bb
+
+(2) Compile Project
+
+$ wget https://github.com/ma16/monte/archive/master.zip
+$ unzip master
+$ cd monte-master
+$ qmake 
+$ make
+
+RUNTIME
+
+The command line option '-v' gives you a diagnostic message. E.g.:
+
+$ ./monte -v
+Qt version: 5.7.1
+Build time: Oct 19 2017 10:19:09
+
+In order to work properly, the program needs to be executed with root permission (unless /dev/mem and /dev/vcio permit non-root access):
+
+$ gksudo ./monte
+
+If you use sudo instead, you may get a diagnostic message (warning):
+
+$ sudo ./monte
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+
+You can make the program SUID root:
+
+$ sudo chown root:root monte ; sudo chmod u+s monte
+
+The program makes use of the Pi's ARM Counter peripheral. The ARM Counter runs on the Video Core's clock which is normally 250 MHz. However, on the Pi-Zero and on the Pi-3, the clock is 400 Mhz and drops to 250 Mhz when idle. This program needs the clock to be fixed to 250 MHz:
+
+/boot/config.txt: core_freq=250
+
+Note: This may cause (relatively) slight performance impacts: The clock drives the memory bus. This clock drives also the Video Core's L2 cache. On a BCM2835, the L2 cache can be shared with the ARM core that runs Linux. [see https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md]
+
+REFERENCE
+
+This project including this file is hosted at https://github.com/ma16/monte.
