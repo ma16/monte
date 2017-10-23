@@ -123,7 +123,7 @@ $ git checkout 5.7
 $ qmake
 $ make -j4
 
-...compilation takes about 17 minutes on a Pi-2 (BCM2836).
+...compilation takes about 11 minutes on a Pi-3.
 
 $ sudo make install
 
@@ -136,6 +136,13 @@ We assume your target system is also a freshly installed Raspbian image (2017-09
 Save the library as tarball on the build system:
 
 $ tar cfvJ libQt5Charts.tar.xz /usr/lib/arm-linux-gnueabihf/libQt5Charts.*
+tar: Removing leading `/' from member names
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.la
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.prl
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5.7
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5.7.1
 
 Deploy the tarball on the target system:
 

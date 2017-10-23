@@ -114,7 +114,7 @@ $ sudo dpkg-reconfigure keyboard-configuration
 
 ...this may not work with a remote terminal (it may be necessary to run this on a local terminal with a keyboard attached).
 
-$ service keyboard-setup restart
+$ sudo service keyboard-setup restart
 
 (see https://wiki.debian.org/Keyboard)
 

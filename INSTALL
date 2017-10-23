@@ -13,7 +13,6 @@ There are four ways to download/build monte:
 * Download source and build a static binary.
 * Download source and build a dynamic binary.
 * Download a pre-built static binary.
-* Download a pre-built dynamic binary.
 
 It is recommended to download the sources and build the program as a static binary. Download and usage of pre-built files is highly discouraged.
 
@@ -44,6 +43,10 @@ The size of the binary is about 20 MB. In order to reduce the size, you may want
 
 $ strip monte
 
+USE STATIC PRE-BUILT BINARY
+
+For convenience, a pre-built static binary is provided. However, it is strongly encouraged to build your own binary from source.
+
 BUILD DYNAMIC BINARY
 
 This requires a dynamic Qt build-environment. See QT_BUILD for details.
@@ -51,14 +54,6 @@ This requires a dynamic Qt build-environment. See QT_BUILD for details.
 The build process is exactly the same as for the static build above.
 
 Besides the binary itself, you may need to deploy also dynamically linked Qt libraries that are required at runtime. For Raspbian (2017-09-07) you need to deploy QtChars (see QT_BUILD for details).
-
-USE STATIC PRE-BUILT BINARY
-
-For convenience, a pre-built static binary is provided. However, it is strongly encouraged to build your own binary from source.
-
-USE DYNAMIC PRE-BUILT BINARY
-
-For convenience, a pre-built dynamic binary and a pre-built QtCharts shared library are provided. However, it is strongly encouraged to build your own binary and library from source.
 
 The tarball with the shared library needs to be deployed as follows:
 
@@ -99,7 +94,7 @@ Note: This may cause (relatively) slight performance impacts: The clock drives t
 
 The program uses the Event Detect Status Register. The Raspbian kernel detects that and disables a related interrupt.
 
-Message from syslogd@fastpi at Oct 22 10:08:22 ...
+Message from syslogd@raspberrypi at Oct 22 10:08:22 ...
  kernel:[ 3858.485793] Disabling IRQ #79
 
 REFERENCE
