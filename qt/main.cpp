@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
     {
 	std::cout
 	    << "Qt version: " << qVersion() << '\n'
-	    << "Build time: " << __DATE__ << ' ' << __TIME__ << '\n' ;
+	    << "Build time: " << __DATE__ << ' ' << __TIME__ << '\n'
+	    << "Release: 1 (beta)\n" ;
 	return 0 ;
     }
     
