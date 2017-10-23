@@ -14,7 +14,9 @@ A slider and a scrollbar are provided for both axes to control the chart. The sl
 
 ## Installation
 
-You can download a pre-build static binary and run it. However, this is not recommended. Instead, you should build the program from source code. For further information read [INSTALL](INSTALL) and [RASPBIAN](RASPBIAN).
+You can download a pre-build static binary and run it: [Release 1 (Beta)](https://github.com/ma16/monte/releases)
+
+However, this is not recommended. Instead, you should build the program from source code. For further information read [INSTALL](INSTALL) and [RASPBIAN](RASPBIAN).
 
 ## Run the Program
 
