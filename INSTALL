@@ -1,4 +1,4 @@
-INSTALLATION NOTES
+INSTALLATION
 
 The platform must be POSIX compliant (e.g. Raspbian) and must support /dev/mem and /dev/vcio.
 
@@ -8,52 +8,67 @@ https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/2017-09-07
 
 Other distributions and also other versions of Raspbian may or may not work.
 
-Notes:
+There are four ways to download/build monte:
 
-* These instructions regard a freshly installed Raspbian image (2017-09-07).
-* Raspbian (2017-09-07) uses gcc version 6.3.0 20170516 (Raspbian 6.3.0-18+rpi1).
-* You may want to use a fast multi-core SOC (e.g. Pi-3) and run make with option -j4 to speed up compilation. (Cross-compiling can be much faster; however it is not covered here.)
+* Download source and build a static binary.
+* Download source and build a dynamic binary.
+* Download a pre-built static binary.
+* Download a pre-built dynamic binary.
 
-CONTRIBUTIONS
+It is recommended to download the sources and build the program as a static binary. Download and usage of pre-built files is highly discouraged.
 
-This project uses (besides all the contributions that come with Raspbian):
+BUILD STATIC BINARY
 
-* the Boost library (https://www.boost.org),
-* the Qt toolkit to provide a GUI (https://www.qt.io),
-* the Fontconfig package to handle fonts in a static Qt installation (https://www.freedesktop.org/wiki/Software/fontconfig).
+This requires a static Qt build-environment. See QT_BUILD for details.
 
-BUILD WITH DYNAMIC QT LIBRARY
-
-(1) Install / Compile contributions:
-
-The package installation and compilation will take a few minutes.
+The application depends on:
+* Boost (see http://www.boost.org)
 
 $ sudo apt-get -y install libboost-dev
-$ sudo apt-get -y install qt5-default
-$ git clone git://code.qt.io/qt/qtcharts.git
-$ cd qtcharts
-$ git checkout 5.7
-$ qmake
-$ make
-$ sudo make install
-$ cd ..
 
-At the time of writing, Raspbian installed:
+...libboost1.62-dev:armhf/1.62.0+dfsg-4 was installed.
 
-* Boost version 1.62 (libboost1.62-dev:armhf/1.62.0+dfsg-4)
-* Qt version 5.7 (qt5-default/5.7.1+dfsg-3+rpi1).
-
-Other Raspbians or an updated Raspbian may install different packages which may result in problems.
-
-Git's QtCharts version was: 01ec7b7ae4cdfabf2228911a96f57e2da8f333bb
-
-(2) Compile Project
+Download and compile the application:
 
 $ wget https://github.com/ma16/monte/archive/master.zip
 $ unzip master
 $ cd monte-master
 $ qmake 
 $ make
+
+If qmake is not in $PATH, you can call it by absolute path name, e.g /opt/qt/5_9_1_static/bin/qmake
+
+At this point the build is finished and the binary (monte) is ready to be deployed to the target system. 
+
+The size of the binary is about 20 MB. In order to reduce the size, you may want to strip the binary before deployment:
+
+$ strip monte
+
+BUILD DYNAMIC BINARY
+
+This requires a dynamic Qt build-environment. See QT_BUILD for details.
+
+The build process is exactly the same as for the static build above.
+
+Besides the binary itself, you may need to deploy also dynamically linked Qt libraries that are required at runtime. For Raspbian (2017-09-07) you need to deploy QtChars (see QT_BUILD for details).
+
+USE STATIC PRE-BUILT BINARY
+
+For convenience, a pre-built static binary is provided. However, it is strongly encouraged to build your own binary from source.
+
+USE DYNAMIC PRE-BUILT BINARY
+
+For convenience, a pre-built dynamic binary and a pre-built QtCharts shared library are provided. However, it is strongly encouraged to build your own binary and library from source.
+
+The tarball with the shared library needs to be deployed as follows:
+
+$ sudo tar xfvJ libQt5Charts.tar.xz -C /
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.la
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.prl
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so -> libQt5Charts.so.5.7.1
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5 -> libQt5Charts.so.5.7.1
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5.7 -> libQt5Charts.so.5.7.1
+/usr/lib/arm-linux-gnueabihf/libQt5Charts.so.5.7.1
 
 RUNTIME
 
@@ -81,6 +96,11 @@ The program makes use of the Pi's ARM Counter peripheral. The ARM Counter runs o
 /boot/config.txt: core_freq=250
 
 Note: This may cause (relatively) slight performance impacts: The clock drives the memory bus. This clock drives also the Video Core's L2 cache. On a BCM2835, the L2 cache can be shared with the ARM core that runs Linux. [see https://www.raspberrypi.org/documentation/configuration/config-txt/overclocking.md]
+
+The program uses the Event Detect Status Register. The Raspbian kernel detects that and disables a related interrupt.
+
+Message from syslogd@fastpi at Oct 22 10:08:22 ...
+ kernel:[ 3858.485793] Disabling IRQ #79
 
 REFERENCE
 

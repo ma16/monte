@@ -1,0 +1,146 @@
+QT BUILD INSTRUCTIONS
+
+A Qt-based application can either be deployed statically or dynamically:
+
+* If statically linked with the Qt library, there is only one (large) file to deploy: the program to execute.
+* If dynamically linked to the Qt library, the program to execute needs to be deployed and the Qt library itself.
+
+In order to build a Qt-based application, a build environment needs to be set up. This environment is only necessary to build (compile) the application. The build environment is not required to run the application.
+
+You may want to use a multi-core SOC and run make with option -j4 to speed up compilation. Cross-compiling can be much faster; it is not covered here though.
+
+BUILD ENVIRONMENT FOR STATIC QT 
+
+Raspbian doesn't provides a package for Qt-based development. Hence we build ourselves a static version of Qt's release 5.9.1 as of 2017/06/30.
+
+A freshly installed Raspbian image (2017-09-07) is used as base for the build.
+
+See https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/2017-09-07-raspbian-stretch.zip
+
+The Qt build depends on:
+* Fontconfig (https://www.freedesktop.org/wiki/Software/fontconfig)
+* Open GL (https://dri.freedesktop.org/wiki/libGL/)
+
+$ sudo apt-get install -y libfontconfig1-dev
+$ sudo apt-get install -y libgl1-mesa-dev
+
+...these versions were installed:
+* libfontconfig1-dev, 2.11.0-6.7 armhf
+* libgl1-mesa-dev, 13.0.6-1+rpi2 armhf
+
+Download and unpack Qt source:
+
+$ wget http://download.qt.io/official_releases/qt/5.9/5.9.1/single/qt-everywhere-opensource-src-5.9.1.tar.xz
+
+$ tar xfJ qt-everywhere-opensource-src-5.9.1.tar.xz
+
+$ mkdir build && cd build
+
+Configure the build:
+
+The Qt library is going to be installed in the directory: /opt/qt/5_9_1_static. Remember this path when you build the Qt-based application. You may want to change the path for your own build.
+
+$ ../qt-everywhere-opensource-src-5.9.1/configure \
+-confirm-license \
+-fontconfig \
+-no-compile-examples \
+-no-qml-debug \
+-opensource \
+-prefix /opt/qt/5_9_1_static \
+-qt-xcb \
+-release \
+-skip qt3d \
+-skip qtactiveqt \
+-skip qtandroidextras \
+-skip qtconnectivity \
+-skip qtdatavis3d \
+-skip qtgamepad \
+-skip qtgraphicaleffects \
+-skip qtlocation \
+-skip qtmacextras \
+-skip qtnetworkauth \
+-skip qtquickcontrols \
+-skip qtquickcontrols2 \
+-skip qtremoteobjects \
+-skip qtscript \
+-skip qtsensors \
+-skip qtserialbus \
+-skip qtserialport \
+-skip qtspeech \
+-skip qttools \
+-skip qttranslations \
+-skip qtvirtualkeyboard \
+-skip qtwayland \
+-skip qtwebchannel \
+-skip qtwebengine \
+-skip qtwebsockets \
+-skip qtwebview \
+-skip qtwinextras \
+-skip qtxmlpatterns \
+-static \
+-system-freetype 
+
+... this takes about 10 minutes and throws several warnings regarding GCC 7.1 which we're going to ignore.
+
+Build and install Qt:
+
+$ make -j4 qtbase
+$ make -j4 
+$ sudo make -j4 install
+
+...this takes about 2 hours on a Pi-3.
+
+Note: We skipped here many modules. In case you needs one of the modules Qt3D or QtLocation, you should be aware that they are very memory demanding when built. No parallel make should be used (-j1) and the Pi should be a model with 1 GB RAM. Using swap space is hardly an option since paging makes the build painfully slow.
+
+At this point, the Qt build environment is ready to use.
+
+If you build your Qt-based application, it will be linked statically. You only need to deploy the binary to your target system which is assumed to be also a freshly installed Raspbian image (2017-09-07).
+
+Anyway, you may also want to save the Qt build environment for later re-use, e.g.:
+
+$ tar cfJ qt_5_9_5_static.tar.xz /opt/qt/5_9_1_static
+
+BUILD ENVIRONMENT FOR DYNAMIC QT 
+
+A freshly installed Raspbian image (2017-09-07) is used as base for the build environment.
+
+See https://downloads.raspberrypi.org/raspbian/images/raspbian-2017-09-08/2017-09-07-raspbian-stretch.zip
+
+Raspbian already provides a package for Qt-based development:
+
+$ sudo apt-get -y install qt5-default
+
+...this installs Qt version 5.7 (qt5-default/5.7.1+dfsg-3+rpi1)
+
+Unfortunatly, the package does not include support for QtCharts. We need to build it ourselves.
+
+$ git clone git://code.qt.io/qt/qtcharts.git
+$ cd qtcharts
+$ git checkout 5.7
+
+...the QtCharts Git's version is: 01ec7b7ae4cdfabf2228911a96f57e2da8f333bb
+
+$ qmake
+$ make -j4
+
+...compilation takes about 17 minutes on a Pi-2 (BCM2836).
+
+$ sudo make install
+
+At this point, the Qt build environment is ready to use.
+
+If you build your Qt-based application, it will be linked dynamically.
+
+We assume your target system is also a freshly installed Raspbian image (2017-09-07): it already provides the Qt-libraries that are dynamically linked at run-time. Thus, normally, it would be enough to deploy the compiled binary. However, since Raspbian doesn't include support for QtCharts, we need to deploy the shared library as well:
+
+Save the library as tarball on the build system:
+
+$ tar cfvJ libQt5Charts.tar.xz /usr/lib/arm-linux-gnueabihf/libQt5Charts.*
+
+Deploy the tarball on the target system:
+
+$ sudo tar xfvJ libQt5Charts.tar.xz -C /
+
+REFERENCE
+
+This project including this file is hosted at https://github.com/ma16/monte.

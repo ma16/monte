@@ -87,7 +87,10 @@ $ ssh pi@demopi
 
 Paging on the Pi can be painfully slow; you may be better off without any page space.
 
+Disable default:
 $ sudo /etc/init.d/dphys-swapfile stop
+
+Enable default:
 $ sudo /etc/init.d/dphys-swapfile start
 
 Permanent setting, e.g.:
@@ -99,7 +102,7 @@ See also swapon, swapoff, mkswap.
 
 The following command lets you de/selected your locales.
 
-$ dpkg-reconfigure locales
+$ sudo dpkg-reconfigure locales
 
 Note: "If you have users who access the system through ssh, it is recommended that you choose None as your default locale."
 
@@ -108,6 +111,10 @@ Note: "If you have users who access the system through ssh, it is recommended th
 (*) Set up the Keyboard Layout:
 
 $ sudo dpkg-reconfigure keyboard-configuration
+
+...this may not work with a remote terminal (it may be necessary to run this on a local terminal with a keyboard attached).
+
+$ service keyboard-setup restart
 
 (see https://wiki.debian.org/Keyboard)
 
@@ -121,8 +128,8 @@ $ sudo dpkg-reconfigure tzdata
 
 Often a host system is used and the Raspberry Pi is headless and/or the Pi is mostly used remotely anyway. In those cases, the password dialog may get a bit annoying. The commands below are executed on the host system.
 
-$ ssh-keygen -t rsa
-$ cat ~/.ssh/id_rsa.pub | ssh pi@demopi 'mkdir -p .ssh && cat >> .ssh/authorized_keys'
+host$ ssh-keygen -t rsa
+host$ cat ~/.ssh/id_rsa.pub | ssh pi@demopi 'mkdir -p .ssh && cat >> .ssh/authorized_keys'
 
 This permits the host to log into the Pi without a password. But not the Pi into the host system. You may not want to enable the latter one, especially not if the Pi is exposed.
 
